@@ -1,0 +1,11 @@
+.div.center{
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+@media (min-width: 768px) {
+    .navbar-nav {
+        float: none;
+    }
+}
