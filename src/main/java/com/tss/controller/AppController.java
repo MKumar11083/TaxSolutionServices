@@ -31,11 +31,10 @@ import org.springframework.web.bind.annotation.SessionAttributes;
 
 import com.tss.model.User;
 import com.tss.model.UserProfile;
+import com.tss.model.UserRegistration;
 import com.tss.service.UserProfileService;
+import com.tss.service.UserRegistrationService;
 import com.tss.service.UserService;
-
-
-
 
 @Controller
 @RequestMapping("/")
@@ -44,6 +43,9 @@ public class AppController {
 
 	@Autowired
 	UserService userService;
+	
+	@Autowired
+	UserRegistrationService userRegistrationService;
 	
 	@Autowired
 	UserProfileService userProfileService;
@@ -63,9 +65,7 @@ public class AppController {
 	 */
 	@GetMapping(value = { "/", "/list" })
 	@ResponseBody
-	public ResponseEntity listUsers(@Valid User user, 
-			  BindingResult result, Model model) {
-
+	public ResponseEntity listUsers(@Valid User user, BindingResult result, Model model) {
 		User users = userService.findBySSO(getPrincipal());
 		return new ResponseEntity(users, HttpStatus.OK);
 		//return "userslist";
@@ -88,8 +88,7 @@ public class AppController {
 	 * saving user in database. It also validates the user input
 	 */
 	@RequestMapping(value = { "/newuser" }, method = RequestMethod.POST)
-	public String saveUser(@Valid User user, BindingResult result,
-			ModelMap model) {
+	public String saveUser(@Valid User user, BindingResult result,ModelMap model) {
 
 		if (result.hasErrors()) {
 			return "registration";
@@ -236,5 +235,32 @@ public class AppController {
 	    return authenticationTrustResolver.isAnonymous(authentication);
 	}
 
+	@RequestMapping(value = { "/registration" }, method = RequestMethod.GET)
+	public String newUserRegistration(ModelMap model) {
+		UserRegistration user = new UserRegistration();
+		model.addAttribute("user", user);
+		model.addAttribute("edit", false);
+		//model.addAttribute("loggedinuser", getPrincipal());
+		return "registration";
+	}
+	
+	@RequestMapping(value = { "/registration" }, method = RequestMethod.POST)
+	public String registration(@Valid UserRegistration user, BindingResult result,ModelMap model) {
 
+		if (result.hasErrors()) {
+			return "registration";
+		}
+
+		if(!userRegistrationService.isUserSSOUnique(user.getUserEmailId().toString())){
+			FieldError ssoError =new FieldError("user","ssoId",messageSource.getMessage("non.unique.ssoId", new String[]{user.getUserEmailId().toString()}, Locale.getDefault()));
+		    result.addError(ssoError);
+			return "registration";
+		}
+		userRegistrationService.saveUser(user);
+		model.addAttribute("success", "User " + user.getUserEmailId() + " registered successfully");
+		model.addAttribute("loggedinuser", getPrincipal());
+		//return "success";
+		return "redirect:/registrationPage";
+	}
+	
 }

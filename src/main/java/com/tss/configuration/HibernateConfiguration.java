@@ -4,6 +4,8 @@ import java.util.Properties;
 
 import javax.sql.DataSource;
  
+
+
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -59,6 +61,23 @@ public class HibernateConfiguration {
        txManager.setSessionFactory(s);
        return txManager;
     }
+    
+   /* private static SessionFactory sessionFactory=null;
+	static {
+		try {
+			sessionFactory=new AnnotationConfiguration().configure().buildSessionFactory();
+		} catch (Throwable ex) {
+			ex.printStackTrace();
+		}
+	}
+	public static Session getSession() {
+		return sessionFactory.openSession();
+	}
+	public static void closeSession(Session session) {
+		session.close();
+	}*/
+    
+    
 }
 
 
